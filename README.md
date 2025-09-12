@@ -9,3 +9,4 @@ R-4.3.3
 * dplyr-1.1.4
 * data.table-1.16.4
 * tidyr-1.3.1
+* parallel-4.3.2

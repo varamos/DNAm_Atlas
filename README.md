@@ -1,7 +1,7 @@
 # DNAm_Atlas
 Pre-install software and R packages
 ## Software
-R-4.3.3
+R-4.3.2
 ## R packages
 * sesame-1.20.0
 * ExperimentHub-2.10.0

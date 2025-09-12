@@ -1,4 +1,3 @@
-### Generate betas using SeSAMe
 library(sesame)
 library(readxl)
 library(dplyr)
@@ -6,30 +5,31 @@ library(data.table)
 library(tidyr)
 library(parallel)
 
+### Generate betas using SeSAMe
 IDs <- read_excel("~/Downloads/scripts/MouseArrayMaster.xlsx", sheet = "Data") %>% dplyr::select(Prep, IDAT) 
 
-pfxes = searchIDATprefixes("~/zhou_lab/projects/20230125_nonGEO_IDATs/MM285/") ## IDAT files location
+pfxes = searchIDATprefixes("/path/idats/") ## IDAT files location (GSE290585)
 sub_pfxes <- pfxes[grepl(paste(IDs$IDAT, collapse = "|"), pfxes)]
 
 all(IDs$IDAT %in% names(sub_pfxes))
 all(names(sub_pfxes) %in% IDs$IDAT)
 
 betas <- openSesame(sub_pfxes, BPPARAM = BiocParallel::MulticoreParam(20)) ## 265 BS | 265 bACE
-saveRDS(betas, "~/path/betas.rds")
+saveRDS(betas, "/path/betas.rds")
 
 
 IDs_5hmC <- IDs %>% filter(grepl("_A", Prep))
 IDs_5modC <- IDs %>% filter(grepl("_B", Prep))
 
 betas_5hmC <- betas[, IDs_5hmC$IDAT]
-saveRDS(betas_5hmC, "~/path/betas_5hmC.rds")
+saveRDS(betas_5hmC, "/path/betas_5hmC.rds")
 betas_5modC <- betas[, IDs_5modC$IDAT]
-saveRDS(betas_5modC, "~/path/betas_5modC.rds")
+saveRDS(betas_5modC, "/path/betas_5modC.rds")
 
 ## Methylation standards (GSE184410)
 IDs <- read.csv("~/Downloads/data/DNAm_standards.csv")
 # download IDAT files from GSE184410
-pfxes = searchIDATprefixes("~/zhou_lab/projects/20230125_nonGEO_IDATs/MM285/") ## location IDAT files downloaded
+pfxes = searchIDATprefixes("/path/idats/") ## location IDAT files downloaded
 sub_pfxes <- pfxes[IDs$IDAT]
 all(IDs$IDAT %in% names(sub_pfxes))
 setdiff(names(sub_pfxes), IDs$IDAT)
@@ -48,7 +48,7 @@ result <- m_ref_1 %>%
   pivot_wider(names_from = probeID, values_from = value, values_fn = mean) %>%
   arrange(info)
 
-exp_5hmC <- readRDS("~/path/betas_5hmC.rds") %>% as.data.frame()
+exp_5hmC <- readRDS("/path/betas_5hmC.rds") %>% as.data.frame()
 exp_5hmC$probeID <- rownames(exp_5hmC)
 exp_5hmC <- exp_5hmC %>% filter(probeID %in% unique(m_ref_1$probeID)) %>% na.omit() 
 exp_5hmC <- exp_5hmC %>% select(probeID, everything())
@@ -75,14 +75,14 @@ corrected_methylation_df <- data.frame(corrected_methylation_values)
 colnames(corrected_methylation_df) <- paste("corrected_", colnames(exp_5hmC)[2:ncol(exp_5hmC)], sep = "")
 
 final_results <- cbind(exp_5hmC, corrected_methylation_df)
-saveRDS(final_results, "~/path/final_results_5hmC.rds")
+saveRDS(final_results, "/path/final_results_5hmC.rds")
 
 ## 5modC, interpolation
 result <- m_ref_1 %>%
   pivot_wider(names_from = probeID, values_from = value, values_fn = mean) %>%
   arrange(info)
 
-exp_5modC <- readRDS("~~/path/betas_5modC.rds") %>% as.data.frame()
+exp_5modC <- readRDS("/path/betas_5modC.rds") %>% as.data.frame()
 exp_5modC$probeID <- rownames(exp_5modC)
 exp_5modC <- exp_5modC %>% filter(probeID %in% unique(m_ref_1$probeID)) %>% na.omit() 
 exp_5modC <- exp_5modC %>% select(probeID, everything())
@@ -109,37 +109,37 @@ corrected_methylation_df <- data.frame(corrected_methylation_values)
 colnames(corrected_methylation_df) <- paste("corrected_", colnames(exp_5modC)[2:ncol(exp_5modC)], sep = "")
 
 final_results <- cbind(exp_5modC, corrected_methylation_df)
-saveRDS(final_results, "~/path/final_results_5modC.rds")
+saveRDS(final_results, "/path/final_results_5modC.rds")
 
-final_results <- readRDS("~/path/final_results_5modC.rds")
+final_results <- readRDS("/path/final_results_5modC.rds")
 rownames(final_results) <- final_results$probeID
 final_results1 <- final_results %>% select(-probeID)
 final_before <- final_results1[,1:(ncol(final_results1)/2)]
 final_after <- final_results1[,(1+(ncol(final_results1)/2)):ncol(final_results1)]
 colnames(final_after) <- gsub("^corrected_", "", colnames(final_after))
-saveRDS(final_after, "~/path/betas_5modC_interpolated.rds") # 5modC betas
+saveRDS(final_after, "/path/betas_5modC_interpolated.rds") # 5modC betas
 
-final_results <- readRDS("~/path/final_results_5hmC.rds")
+final_results <- readRDS("/path/final_results_5hmC.rds")
 rownames(final_results) <- final_results$probeID
 final_results1 <- final_results %>% select(-probeID)
 final_before <- final_results1[,1:(ncol(final_results1)/2)]
 final_after <- final_results1[,(1+(ncol(final_results1)/2)):ncol(final_results1)]
 colnames(final_after) <- gsub("^corrected_", "", colnames(final_after))
-saveRDS(final_after, "~/path/betas_5hmC_interpolated.rds") # 5hmC betas
+saveRDS(final_after, "/path/betas_5hmC_interpolated.rds") # 5hmC betas
 
 ## Generate 5mC profiles (5modC - 5hmC)
 IDs <- read_excel("~/Downloads/data/MouseArrayMaster.xlsx", sheet = "Data"
 )  %>% dplyr::select(Prep, IDAT, IDAT, Tissue, Sex) 
 
-modC <- readRDS("~/path/betas_5modC_interpolated.rds")
-hmC <- readRDS("~/path/betas_5hmC_interpolated.rds")
+modC <- readRDS("/path/betas_5modC_interpolated.rds")
+hmC <- readRDS("/path/betas_5hmC_interpolated.rds")
 
 dictionary_df <- setNames(IDs$Prep, IDs$IDAT)
 names(modC) <- dictionary_df[names(modC)]
 names(hmC) <- dictionary_df[names(hmC)]
 
-saveRDS(modC, "~/path/betas_5modC_interpolated_prep.rds")
-saveRDS(hmC, "~/path/betas_5hmC_interpolated_prep.rds")
+saveRDS(modC, "/path/betas_5modC_interpolated_prep.rds")
+saveRDS(hmC, "/path/betas_5hmC_interpolated_prep.rds")
 
 modC_only <- setdiff(rownames(modC), rownames(hmC))
 hmC_only <- setdiff(rownames(hmC), rownames(modC))
@@ -150,7 +150,7 @@ hmC_1 <- hmC[common_rows, , drop = FALSE]
 mC_1 <- modC_1 - hmC_1
 mC_1 <- apply(mC_1, c(1, 2), function(x) ifelse(is.na(x), NA, ifelse(x < 0, 0, x)))
 mC_1 <- mC_1 %>% as.data.frame()
-saveRDS(mC_1,"~/path/betas_5mC_substracted_prep.rds")
+saveRDS(mC_1,"/path/betas_5mC_substracted_prep.rds")
 
 modC_1$probeID <- rownames(modC_1)
 modC1 <- melt(modC_1)

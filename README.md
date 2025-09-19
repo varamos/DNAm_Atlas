@@ -8,8 +8,8 @@ This repository contains code and data for the paper:
 
 This repository uses dual licensing depending on content type:
 
-- 🧪 **Code** (`code/` folder): Licensed under the [MIT License](LICENSE)
-- 📊 **Data & Documentation** (`data/`, `docs/` folders): Licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
+- 🧪 **Code** (`script/` folder): Licensed under the [MIT License](LICENSE)
+- 📊 **Data & Documentation** (`data/` folder): Licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
 
 If you reuse or modify content from this repository, please cite the source and follow the appropriate license terms.
 
